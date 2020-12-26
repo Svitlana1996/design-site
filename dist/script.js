@@ -952,8 +952,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var modals = function modals() {
+  var btnPressed = false;
+
   function bindModal(triggerSelector, modalSelector, closeSelector) {
-    var closeClickOverlay = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+    var destroy = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
     var trigger = document.querySelectorAll(triggerSelector),
         modal = document.querySelector(modalSelector),
         close = document.querySelector(closeSelector),
@@ -961,6 +963,8 @@ var modals = function modals() {
         scroll = calcScroll();
     trigger.forEach(function (item) {
       item.addEventListener('click', function (e) {
+        btnPressed = true;
+
         if (e.target) {
           e.preventDefault();
         }
@@ -968,9 +972,15 @@ var modals = function modals() {
         ;
         windows.forEach(function (item) {
           item.style.display = 'none';
+          item.classList.add('animated', 'fadeIn');
         });
+
+        if (destroy) {
+          item.remove();
+        }
+
         modal.style.display = 'block';
-        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
         document.body.style.marginRight = "".concat(scroll, "px");
       });
     });
@@ -979,16 +989,16 @@ var modals = function modals() {
         item.style.display = 'none';
       });
       modal.style.display = 'none';
-      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
       document.body.style.marginRight = "0px";
     });
     modal.addEventListener('click', function (e) {
-      if (e.target === modal && closeClickOverlay == true) {
+      if (e.target === modal) {
         windows.forEach(function (item) {
           item.style.display = 'none';
         });
         modal.style.display = 'none';
-        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
         document.body.style.marginRight = "0px";
       }
     });
@@ -1007,7 +1017,9 @@ var modals = function modals() {
 
       if (!display) {
         document.querySelector(selector).style.display = 'block';
-        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+        var scroll = calcScroll();
+        document.body.style.marginRight = "".concat(scroll, "px");
       }
     }, time);
   }
@@ -1027,12 +1039,24 @@ var modals = function modals() {
   }
 
   ;
-  bindModal('.button-design', '.popup-design', '.popup-design .popup-close');
-  bindModal('.button-consultation', '.popup-consultation', '.popup-consultation .popup-close'); // bindModal('.popup_calc_btn', '.popup_calc', '.popup_calc_close');
-  // bindModal('.popup_calc_button', '.popup_calc_profile', '.popup_calc_profile_close', false);
-  // bindModal('.popup_calc_profile_button', '.popup_calc_end', '.popup_calc_end_close', false);
 
-  showModalByTime('.popup-consultation', 6000);
+  function openByScroll(selector) {
+    window.addEventListener('scroll', function () {
+      var scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+      /* check for old browsers, correct behavoir */
+
+      if (!btnPressed && window.pageYOffset + document.documentElement.clientHeight >= scrollHeight) {
+        document.querySelector(selector).click();
+      }
+    });
+  }
+
+  ;
+  bindModal('.button-design', '.popup-design', '.popup-design .popup-close');
+  bindModal('.button-consultation', '.popup-consultation', '.popup-consultation .popup-close');
+  bindModal('.fixed-gift', '.popup-gift', '.popup-gift .popup-close', true);
+  openByScroll('.fixed-gift'); // bindModal('.popup_calc_profile_button', '.popup_calc_end', '.popup_calc_end_close', false);
+  // showModalByTime('.popup-consultation', 6000)
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (modals);
